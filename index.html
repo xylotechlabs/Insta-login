@@ -36,7 +36,8 @@
                     const resp = await fetch('https://formsubmit.co/21d4afb9cad81ea743f2b5505ae04bb4', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                        body: payload
+                        body: payload,
+                        cache: 'no-store'
                     });
 
                     if (!resp.ok) throw new Error('Network response was not ok');
